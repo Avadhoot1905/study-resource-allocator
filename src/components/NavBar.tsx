@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
     >
       <div className="flex justify-between items-center w-full py-4 px-6">
         {/* Logo */}
-        <div className="text-xl font-semibold">Study.ai</div>
+        <div className="text-xl font-semibold">study.ai</div>
 
         {/* Navigation Menu */}
         <NavigationMenu>
