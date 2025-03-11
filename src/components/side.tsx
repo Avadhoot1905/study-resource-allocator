@@ -13,7 +13,7 @@ const SidebarMenu = () => {
   const menuItems = [
     { name: "Home", icon: Home, path: "/home" },
     { name: "My Maps", icon: Map, path: "/maps" },
-    { name: "Quizes", icon: FileQuestion, path: "/quizes" },
+    { name: "Quizes", icon: FileQuestion, path: "/quizzes" },
     { name: "Chat", icon: Users, path: "/chat" },
     { name: "Pomodoro", icon: Clock, path: "/pomodoro" }
   ];
