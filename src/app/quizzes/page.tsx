@@ -34,33 +34,35 @@ const QuizzesPage: React.FC = () => {
 
     return (
         <SidebarProvider>
-            <div className="flex min-h-screen bg-gray-100">
+            <div className="flex h-screen w-full overflow-hidden">
                 <SidebarMenu />
-                <div className="flex flex-col items-center w-full p-6 relative">
-                    {!quizStarted ? (
-                        <QuizSetupCard onStartQuiz={() => setQuizStarted(true)} />
-                    ) : (
-                        <>
-                            <div className="absolute top-4 right-4">
-                                <Timer initialTime={30} />
+                <main className="flex-1 p-6 overflow-auto">
+                    <div className="max-w-2xl mx-auto">
+                        {!quizStarted ? (
+                            <QuizSetupCard onStartQuiz={() => setQuizStarted(true)} />
+                        ) : (
+                            <div className="relative">
+                                <div className="absolute top-0 right-0">
+                                    <Timer initialTime={30} />
+                                </div>
+                                <QuestionCard
+                                    key={currentQuestionIndex}
+                                    question={questions[currentQuestionIndex].question}
+                                    options={questions[currentQuestionIndex].options}
+                                    selectedOption={selectedOptions[currentQuestionIndex]}
+                                    onSelectOption={handleOptionSelect}
+                                />
+                                <div className="flex justify-end w-full mt-4">
+                                    {currentQuestionIndex < questions.length - 1 ? (
+                                        <Button onClick={handleNextQuestion}>Next Question</Button>
+                                    ) : (
+                                        <SubmitButton />
+                                    )}
+                                </div>
                             </div>
-                            <QuestionCard
-                                key={currentQuestionIndex}
-                                question={questions[currentQuestionIndex].question}
-                                options={questions[currentQuestionIndex].options}
-                                selectedOption={selectedOptions[currentQuestionIndex]}
-                                onSelectOption={handleOptionSelect}
-                            />
-                            <div className="flex justify-end w-full mt-4">
-                                {currentQuestionIndex < questions.length - 1 ? (
-                                    <Button onClick={handleNextQuestion}>Next Question</Button>
-                                ) : (
-                                    <SubmitButton />
-                                )}
-                            </div>
-                        </>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </main>
             </div>
         </SidebarProvider>
     );

@@ -19,7 +19,7 @@ const SidebarMenu = () => {
   ];
 
   return (
-    <div className="h-screen w-64  text-white p-4 flex flex-col gap-4">
+    <div className="h-screen flex-shrink-0 w-64 text-white p-4 flex flex-col gap-4 border-r">
       <Sidebar>
         <SidebarHeader className="flex items-center gap-2 translate-y-9 text-lg font-semibold">
           <span>study.ai</span>
