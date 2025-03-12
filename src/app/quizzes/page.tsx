@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import SidebarMenu from '@/components/side';
 import QuizSetupCard from '@/components/quiz-card';
 import QuestionCard from '@/components/question-card';
-import Timer from '@/components/quiz-timer';
+import CountdownTimer from '@/components/quiz-timer'; // Import the new timer component
 import SubmitButton from '@/components/submit';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -32,19 +32,38 @@ const QuizzesPage: React.FC = () => {
         setSelectedOptions(updatedOptions);
     };
 
+    const handleTimeUp = () => {
+        // Auto-submit when time runs out
+        console.log("Time's up! Submitting quiz...");
+        // Add your submission logic here
+    };
+
     return (
         <SidebarProvider>
             <div className="flex h-screen w-full overflow-hidden">
                 <SidebarMenu />
                 <main className="flex-1 p-6 overflow-auto">
+                    <div className="relative">
+                        <h1 className="text-4xl font-bold mb-6">Quizzes</h1>
+                        
+                        {quizStarted && (
+                            <div className="absolute top-0 right-0">
+                                <CountdownTimer 
+                                    initialMinutes={0} 
+                                    initialSeconds={30} 
+                                    onTimeUp={handleTimeUp}
+                                    autoStart={true}
+                                    compact={true}
+                                />
+                            </div>
+                        )}
+                    </div>
+
                     <div className="max-w-2xl mx-auto">
                         {!quizStarted ? (
                             <QuizSetupCard onStartQuiz={() => setQuizStarted(true)} />
                         ) : (
-                            <div className="relative">
-                                <div className="absolute top-0 right-0">
-                                    <Timer initialTime={30} />
-                                </div>
+                            <div className="mt-12">
                                 <QuestionCard
                                     key={currentQuestionIndex}
                                     question={questions[currentQuestionIndex].question}

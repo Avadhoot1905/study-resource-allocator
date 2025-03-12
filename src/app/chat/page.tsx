@@ -20,32 +20,44 @@ export default function ChatPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen">
+      <div className="flex h-screen w-full overflow-hidden">
         <SidebarMenu />
-        <div className="flex flex-col flex-1 max-w-2xl max mx-auto p-4 items-center justify-center">
-          <Card className="w-full max-w-lg flex-1 overflow-auto p-6 space-y-2">
-            <CardContent>
-              {messages.length === 0 ? (
-                <p className="text-gray-500 text-center">No messages yet...</p>
-              ) : (
-                messages.map((msg, index) => (
-                  <div key={index} className="p-3 bg-gray-100 rounded-lg text-center">
-                    {msg}
+        <main className="flex-1 p-4 flex flex-col">
+          <div className="flex flex-col flex-1 max-w-3xl w-full mx-auto">
+            <Card className="flex-1 overflow-auto mb-4 shadow-md">
+              <CardContent className="p-4 h-full">
+                {messages.length === 0 ? (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-gray-500 text-center">No messages yet...</p>
                   </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-          <div className="mt-4 flex items-center gap-2 w-full max-w-lg">
-            <Textarea
-              className="flex-1 resize-none"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a message..."
-            />
-            <Button onClick={sendMessage}>Send</Button>
+                ) : (
+                  <div className="space-y-3">
+                    {messages.map((msg, index) => (
+                      <div key={index} className="p-3 bg-gray-100 rounded-lg">
+                        {msg}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <div className="flex items-center gap-2 w-full">
+              <Textarea
+                className="flex-1 resize-none"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type a message..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+              />
+              <Button onClick={sendMessage}>Send</Button>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </SidebarProvider>
   );

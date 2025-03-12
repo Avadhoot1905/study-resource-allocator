@@ -29,7 +29,7 @@ const QuizResultPage: React.FC = () => {
     };
     
     const handleBackToHome = () => {
-        router.push('/home'); // Navigate to home page
+        router.push('/quizzes'); // Navigate to home page
     };
 
     return (
@@ -93,7 +93,7 @@ const QuizResultPage: React.FC = () => {
                             className="flex-1"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Home
+                            Back to Quiz Page
                         </Button>
                         
                         <Button 
