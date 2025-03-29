@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import NavBar from "../../components/NavBar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// import { signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
 const LandingPage: React.FC = () => {
@@ -27,17 +27,17 @@ const LandingPage: React.FC = () => {
     }
   }, [message]);
 
-//   const handleSignIn = async () => {
-//     try {
-//       await signIn("google");
-//     } catch (error) {
-//       console.error("Sign-in failed:", error);
-//     }
-//   };
+  const handleSignIn = async () => {
+    try {
+      await signIn("google");
+    } catch (error) {
+      console.error("Sign-in failed:", error);
+    }
+  };
 
   return (
     <div>
-      {/* Popup for Sign-in Required Message
+       {/* Popup for Sign-in Required Message */}
       {showPopup && (
         <div className="fixed bottom-4 right-4 p-4 bg-white shadow-lg rounded-lg z-50 flex flex-col items-center text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-2">Sign In Required</h2>
@@ -46,7 +46,7 @@ const LandingPage: React.FC = () => {
             OK
           </Button>
         </div>
-      )} */}
+      )} 
 
 
       <div className="max-w-6xl mx-auto flex justify-center">
@@ -67,7 +67,7 @@ const LandingPage: React.FC = () => {
             A fully customizable scheduling experience for individuals, businesses taking calls, and developers building scheduling platforms where users meet users.
           </p>
 
-          <Button className="w-full bg-black text-white hover:bg-gray-800 mb-3">  
+          <Button onClick={handleSignIn} className="w-full bg-black text-white hover:bg-gray-800 mb-3">  
             Sign up with Google
           </Button>
 
