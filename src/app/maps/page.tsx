@@ -21,6 +21,7 @@ import ReactFlow, {
   Panel
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { motion, AnimatePresence } from "framer-motion";
 
 const subjects = ["Math", "Science", "History", "Geography", "Computer Science", "Physics", "Chemistry"];
 
@@ -76,6 +77,66 @@ const initialEdges: Edge[] = [
   { id: 'e5-6', source: '5', target: '6' },
 ];
 
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      when: "beforeChildren",
+      staggerChildren: 0.1
+    }
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      when: "afterChildren",
+      staggerChildren: 0.05,
+      staggerDirection: -1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 20
+    }
+  },
+  exit: { 
+    y: -20, 
+    opacity: 0,
+    transition: {
+      duration: 0.2
+    }
+  }
+};
+
+const pageTransition = {
+  hidden: { opacity: 0, x: -300 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 20
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    x: 300,
+    transition: {
+      duration: 0.3
+    }
+  }
+};
+
 const MapsPage = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
@@ -116,66 +177,148 @@ const MapsPage = () => {
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-auto bg-gray-100">
           <div className="max-w-5xl mx-auto space-y-6">
-            {/* If a subject is selected, show subject page with map */}
-            {selectedSubject ? (
-              <div className="w-full bg-white shadow-md rounded-lg flex flex-col">
-                <div className="p-6 border-b">
-                  <h2 className="text-2xl font-bold text-center">{selectedSubject} Learning Path</h2>
-                </div>
-                
-                {/* Study Map */}
-                <div className="w-full h-[600px] p-4">
-                  <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    fitView
+            <AnimatePresence mode="wait">
+              {/* If a subject is selected, show subject page with map */}
+              {selectedSubject ? (
+                <motion.div 
+                  key="subject-view"
+                  className="w-full bg-white shadow-md rounded-lg flex flex-col"
+                  variants={pageTransition}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  layout
+                >
+                  <motion.div 
+                    className="p-6 border-b"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    layout
                   >
-                    <Background />
-                    <Controls />
-                    <MiniMap />
-                    <Panel position="top-right">
-                      <Button onClick={addNode}>Add Node</Button>
-                    </Panel>
-                  </ReactFlow>
-                </div>
-                
-                <div className="p-4 border-t">
-                  <Button 
-                    className="w-full" 
-                    onClick={() => setSelectedSubject(null)}
+                    <h2 className="text-2xl font-bold text-center">{selectedSubject} Learning Path</h2>
+                  </motion.div>
+                  
+                  {/* Study Map */}
+                  <motion.div 
+                    className="w-full h-[600px] p-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    layout
                   >
-                    Back to Subjects
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Centered Heading */}
-                <h1 className="text-3xl font-bold text-center">Maps</h1>
-
-                {/* Search Bar with Create New Button */}
-                <div className="flex items-center gap-2 w-full max-w-lg mx-auto">
-                  <Input type="text" placeholder="Search..." className="flex-1" />
-                  <Button> Create New + </Button>
-                </div>
-
-                {/* Subject Cards (Clickable to Open Individual Pages) */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {subjects.map((subject) => (
-                    <Card
-                      key={subject}
-                      className="p-4 text-center shadow-md transition-all rounded-lg cursor-pointer hover:bg-gray-200 hover:shadow-lg active:scale-95"
-                      onClick={() => setSelectedSubject(subject)}
+                    <ReactFlow
+                      nodes={nodes}
+                      edges={edges}
+                      onNodesChange={onNodesChange}
+                      onEdgesChange={onEdgesChange}
+                      onConnect={onConnect}
+                      fitView
                     >
-                      <CardContent className="font-semibold">{subject}</CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </>
-            )}
+                      <Background />
+                      <Controls />
+                      <MiniMap />
+                      <Panel position="top-right">
+                        <motion.div 
+                          whileHover={{ scale: 1.05 }} 
+                          whileTap={{ scale: 0.95 }}
+                          style={{ transformOrigin: "center" }}
+                        >
+                          <Button onClick={addNode}>Add Node</Button>
+                        </motion.div>
+                      </Panel>
+                    </ReactFlow>
+                  </motion.div>
+                  
+                  <motion.div 
+                    className="p-4 border-t"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    layout
+                  >
+                    <motion.div 
+                      whileHover={{ scale: 1.02 }} 
+                      whileTap={{ scale: 0.98 }}
+                      style={{ transformOrigin: "center" }}
+                    >
+                      <Button 
+                        className="w-full" 
+                        onClick={() => setSelectedSubject(null)}
+                      >
+                        Back to Subjects
+                      </Button>
+                    </motion.div>
+                  </motion.div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="subjects-list"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-6"
+                  layout
+                >
+                  {/* Centered Heading */}
+                  <motion.h1 
+                    className="text-3xl font-bold text-center"
+                    variants={itemVariants}
+                    layout
+                  >
+                    Maps
+                  </motion.h1>
+
+                  {/* Search Bar with Create New Button */}
+                  <motion.div 
+                    className="flex items-center gap-2 w-full max-w-lg mx-auto"
+                    variants={itemVariants}
+                    layout
+                  >
+                    <Input type="text" placeholder="Search..." className="flex-1" />
+                    <motion.div 
+                      whileHover={{ scale: 1.05 }} 
+                      whileTap={{ scale: 0.95 }}
+                      style={{ transformOrigin: "center" }}
+                    >
+                      <Button> Create New + </Button>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Subject Cards (Clickable to Open Individual Pages) */}
+                  <motion.div 
+                    className="grid grid-cols-2 md:grid-cols-3 gap-4"
+                    variants={itemVariants}
+                    layout
+                  >
+                    {subjects.map((subject, index) => (
+                      <motion.div
+                        key={subject}
+                        variants={itemVariants}
+                        custom={index}
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)"
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{ transformOrigin: "center" }}
+                        layout
+                      >
+                        <Card
+                          className="text-center shadow-md transition-all rounded-lg cursor-pointer hover:bg-gray-200"
+                          onClick={() => setSelectedSubject(subject)}
+                        >
+                          <CardContent className="p-4 font-semibold">
+                            {subject}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </main>
       </div>
