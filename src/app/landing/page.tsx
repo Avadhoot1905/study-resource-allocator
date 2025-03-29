@@ -142,7 +142,7 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
-                Cal.com launches v5.0
+                study.com launches v1.0
               </motion.p>
               <motion.h1 
                 className="text-4xl font-bold text-gray-900 mb-4"
@@ -150,7 +150,7 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
               >
-                The better way to schedule your meetings
+                The better way to find study resources and contents
               </motion.h1>
               <motion.p 
                 className="text-gray-600 mb-6"
@@ -158,7 +158,7 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8, duration: 0.6 }}
               >
-                A fully customizable scheduling experience for individuals, businesses taking calls, and developers building scheduling platforms where users meet users.
+                A seamless and intelligent goal-tracking platform that helps individuals stay on top of their study plans with automated scheduling and Google Calendar integration.
               </motion.p>
 
               <motion.div
