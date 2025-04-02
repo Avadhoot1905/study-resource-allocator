@@ -23,7 +23,7 @@ export async function generateRoadmap(subject: string, level: string = "beginner
   }
 
   const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `Create a detailed study roadmap for ${subject} at ${level} level.
   

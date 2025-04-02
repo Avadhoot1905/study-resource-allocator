@@ -7,6 +7,7 @@ interface TimerProps {
   initialMinutes?: number;
   initialSeconds?: number;
   onTimeUp?: () => void;
+  onTimeUpdate?: (remainingSeconds: number) => void;
   autoStart?: boolean;
   compact?: boolean;
 }
@@ -15,6 +16,7 @@ export default function CountdownTimer({
   initialMinutes = 0, 
   initialSeconds = 30, 
   onTimeUp,
+  onTimeUpdate,
   autoStart = false,
   compact = false
 }: TimerProps) {
