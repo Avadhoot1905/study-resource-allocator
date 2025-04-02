@@ -93,6 +93,7 @@ const MapsPage = () => {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newSubject, setNewSubject] = useState("");
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -114,12 +115,11 @@ const MapsPage = () => {
     setError(null);
     
     try {
-      // Call the server action directly
       const roadmapData = await generateRoadmap(subject, studyLevel);
-      
       setNodes(roadmapData.nodes);
       setEdges(roadmapData.edges);
       setSelectedSubject(subject);
+      setNewSubject(""); // Clear input after creation
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate roadmap');
       console.error('Error generating roadmap:', err);
@@ -128,6 +128,11 @@ const MapsPage = () => {
     }
   };
 
+  const handleCreateNew = () => {
+    if (newSubject.trim()) {
+      generateRoadmapHandler(newSubject.trim());
+    }
+  };
 
   const addNode = () => {
     const newNode: Node = {
@@ -249,12 +254,24 @@ const MapsPage = () => {
                     variants={itemVariants}
                     layout
                   >
-                    <Input type="text" placeholder="Search..." className="flex-1" />
+                    <Input 
+                      type="text" 
+                      placeholder="Enter subject name..." 
+                      className="flex-1"
+                      value={newSubject}
+                      onChange={(e) => setNewSubject(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleCreateNew()}
+                    />
                     <motion.div 
                       whileHover={{ scale: 1.05 }} 
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Button> Create New + </Button>
+                      <Button 
+                        onClick={handleCreateNew}
+                        disabled={!newSubject.trim()}
+                      >
+                        Create New
+                      </Button>
                     </motion.div>
                   </motion.div>
 
