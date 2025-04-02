@@ -22,60 +22,9 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { motion, AnimatePresence } from "framer-motion";
+import { generateRoadmap } from "../actions/maps";
 
 const subjects = ["Math", "Science", "History", "Geography", "Computer Science", "Physics", "Chemistry"];
-
-// Initial nodes for the study map
-const initialNodes: Node[] = [
-  {
-    id: '1',
-    type: 'input',
-    data: { label: 'Main Topic' },
-    position: { x: 250, y: 5 },
-    style: { background: '#3b82f6', color: 'white', border: '1px solid #2563eb', width: 180 }
-  },
-  {
-    id: '2',
-    data: { label: 'Subtopic 1' },
-    position: { x: 100, y: 100 },
-    style: { background: '#10b981', color: 'white', border: '1px solid #059669', width: 150 }
-  },
-  {
-    id: '3',
-    data: { label: 'Subtopic 2' },
-    position: { x: 400, y: 100 },
-    style: { background: '#10b981', color: 'white', border: '1px solid #059669', width: 150 }
-  },
-  {
-    id: '4',
-    data: { label: 'Resource: Video Tutorial' },
-    position: { x: 100, y: 200 },
-    style: { background: '#8b5cf6', color: 'white', border: '1px solid #7c3aed', width: 180 }
-  },
-  {
-    id: '5',
-    data: { label: 'Resource: Practice Exercise' },
-    position: { x: 400, y: 200 },
-    style: { background: '#8b5cf6', color: 'white', border: '1px solid #7c3aed', width: 180 }
-  },
-  {
-    id: '6',
-    type: 'output',
-    data: { label: 'Final Project' },
-    position: { x: 250, y: 300 },
-    style: { background: '#f59e0b', color: 'white', border: '1px solid #d97706', width: 150 }
-  },
-];
-
-// Initial edges for the study map
-const initialEdges: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e1-3', source: '1', target: '3', animated: true },
-  { id: 'e2-4', source: '2', target: '4' },
-  { id: 'e3-5', source: '3', target: '5' },
-  { id: 'e4-6', source: '4', target: '6' },
-  { id: 'e5-6', source: '5', target: '6' },
-];
 
 // Animation variants
 const containerVariants = {
@@ -139,8 +88,11 @@ const pageTransition = {
 
 const MapsPage = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  const [studyLevel, setStudyLevel] = useState<string>("beginner");
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -157,6 +109,26 @@ const MapsPage = () => {
     []
   );
 
+  const generateRoadmapHandler = async (subject: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Call the server action directly
+      const roadmapData = await generateRoadmap(subject, studyLevel);
+      
+      setNodes(roadmapData.nodes);
+      setEdges(roadmapData.edges);
+      setSelectedSubject(subject);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate roadmap');
+      console.error('Error generating roadmap:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   const addNode = () => {
     const newNode: Node = {
       id: `${nodes.length + 1}`,
@@ -171,14 +143,10 @@ const MapsPage = () => {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full overflow-hidden">
-        {/* Sidebar */}
         <SidebarMenu />
-
-        {/* Main Content */}
         <main className="flex-1 p-6 overflow-auto bg-gray-100">
           <div className="max-w-5xl mx-auto space-y-6">
             <AnimatePresence mode="wait">
-              {/* If a subject is selected, show subject page with map */}
               {selectedSubject ? (
                 <motion.div 
                   key="subject-view"
@@ -199,7 +167,6 @@ const MapsPage = () => {
                     <h2 className="text-2xl font-bold text-center">{selectedSubject} Learning Path</h2>
                   </motion.div>
                   
-                  {/* Study Map */}
                   <motion.div 
                     className="w-full h-[600px] p-4"
                     initial={{ opacity: 0 }}
@@ -207,27 +174,36 @@ const MapsPage = () => {
                     transition={{ delay: 0.3, duration: 0.5 }}
                     layout
                   >
-                    <ReactFlow
-                      nodes={nodes}
-                      edges={edges}
-                      onNodesChange={onNodesChange}
-                      onEdgesChange={onEdgesChange}
-                      onConnect={onConnect}
-                      fitView
-                    >
-                      <Background />
-                      <Controls />
-                      <MiniMap />
-                      <Panel position="top-right">
-                        <motion.div 
-                          whileHover={{ scale: 1.05 }} 
-                          whileTap={{ scale: 0.95 }}
-                          style={{ transformOrigin: "center" }}
-                        >
-                          <Button onClick={addNode}>Add Node</Button>
-                        </motion.div>
-                      </Panel>
-                    </ReactFlow>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center h-full">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                      </div>
+                    ) : error ? (
+                      <div className="flex items-center justify-center h-full text-red-500">
+                        {error}
+                      </div>
+                    ) : (
+                      <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        fitView
+                      >
+                        <Background />
+                        <Controls />
+                        <MiniMap />
+                        <Panel position="top-right">
+                          <motion.div 
+                            whileHover={{ scale: 1.05 }} 
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button onClick={addNode}>Add Node</Button>
+                          </motion.div>
+                        </Panel>
+                      </ReactFlow>
+                    )}
                   </motion.div>
                   
                   <motion.div 
@@ -240,7 +216,6 @@ const MapsPage = () => {
                     <motion.div 
                       whileHover={{ scale: 1.02 }} 
                       whileTap={{ scale: 0.98 }}
-                      style={{ transformOrigin: "center" }}
                     >
                       <Button 
                         className="w-full" 
@@ -261,7 +236,6 @@ const MapsPage = () => {
                   className="space-y-6"
                   layout
                 >
-                  {/* Centered Heading */}
                   <motion.h1 
                     className="text-3xl font-bold text-center"
                     variants={itemVariants}
@@ -270,7 +244,6 @@ const MapsPage = () => {
                     Maps
                   </motion.h1>
 
-                  {/* Search Bar with Create New Button */}
                   <motion.div 
                     className="flex items-center gap-2 w-full max-w-lg mx-auto"
                     variants={itemVariants}
@@ -280,13 +253,28 @@ const MapsPage = () => {
                     <motion.div 
                       whileHover={{ scale: 1.05 }} 
                       whileTap={{ scale: 0.95 }}
-                      style={{ transformOrigin: "center" }}
                     >
                       <Button> Create New + </Button>
                     </motion.div>
                   </motion.div>
 
-                  {/* Subject Cards (Clickable to Open Individual Pages) */}
+                  <motion.div 
+                    className="flex flex-col gap-2 w-full max-w-lg mx-auto"
+                    variants={itemVariants}
+                    layout
+                  >
+                    <label className="text-sm font-medium">Study Level</label>
+                    <select
+                      value={studyLevel}
+                      onChange={(e) => setStudyLevel(e.target.value)}
+                      className="p-2 border rounded-md"
+                    >
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </motion.div>
+
                   <motion.div 
                     className="grid grid-cols-2 md:grid-cols-3 gap-4"
                     variants={itemVariants}
@@ -302,12 +290,11 @@ const MapsPage = () => {
                           boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)"
                         }}
                         whileTap={{ scale: 0.95 }}
-                        style={{ transformOrigin: "center" }}
                         layout
                       >
                         <Card
                           className="text-center shadow-md transition-all rounded-lg cursor-pointer hover:bg-gray-200"
-                          onClick={() => setSelectedSubject(subject)}
+                          onClick={() => generateRoadmapHandler(subject)}
                         >
                           <CardContent className="p-4 font-semibold">
                             {subject}
