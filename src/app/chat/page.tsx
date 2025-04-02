@@ -21,6 +21,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // Initialize Google GenAI - in a real app, use environment variables
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || "";
@@ -77,6 +78,28 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Function to format text with basic markdown-like styling
+  const formatText = (text: string) => {
+    // Convert the text to HTML with basic formatting
+    let formattedText = text
+      // Handle code blocks
+      .replace(/```([^`]+)```/g, '<pre class="bg-gray-800 text-gray-200 p-3 my-2 rounded overflow-x-auto"><code>$1</code></pre>')
+      // Handle inline code
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-200 px-1 rounded">$1</code>')
+      // Handle bold text
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      // Handle italic text
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+      // Handle lists (basic)
+      .replace(/^\s*-\s+(.+)$/gm, '<li class="ml-4">$1</li>')
+      // Handle ordered lists (basic)
+      .replace(/^\s*(\d+)\.\s+(.+)$/gm, '<li class="ml-4">$2</li>')
+      // Handle line breaks
+      .replace(/\n/g, '<br />');
+    
+    return formattedText;
+  };
+
   return (
     <SidebarProvider>
       <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden">
@@ -84,72 +107,84 @@ export default function ChatPage() {
           <SidebarMenu />
         </div>
         <motion.main 
-          className="flex-1 p-2 md:p-4 flex flex-col"
+          className="flex-1 p-2 md:p-4 flex flex-col h-screen"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
           <motion.div 
-            className="flex flex-col flex-1 w-full max-w-3xl mx-auto"
+            className="flex flex-col flex-1 w-full max-w-3xl mx-auto h-full"
             initial={{ y: 20 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <Card className="flex-1 overflow-auto mb-2 md:mb-4 shadow-md">
-              <CardContent className="p-2 md:p-4 h-full">
-                <AnimatePresence>
-                  {messages.length === 0 ? (
-                    <motion.div 
-                      className="h-full flex items-center justify-center"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <motion.p 
-                        className="text-gray-500 text-center"
-                        initial={{ scale: 0.9 }}
-                        animate={{ scale: 1 }}
-                        transition={{ 
-                          repeat: Infinity, 
-                          repeatType: "reverse", 
-                          duration: 2,
-                          ease: "easeInOut" 
-                        }}
+            <Card className="flex-1 mb-2 md:mb-4 shadow-md flex flex-col h-[calc(100vh-120px)]">
+              <CardContent className="p-2 md:p-4 flex-1 overflow-hidden flex flex-col">
+                <div 
+                  ref={chatContainerRef}
+                  className="flex-1 overflow-y-auto overflow-x-hidden"
+                >
+                  <AnimatePresence>
+                    {messages.length === 0 ? (
+                      <motion.div 
+                        className="h-full flex items-center justify-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
                       >
-                        No messages yet...
-                      </motion.p>
-                    </motion.div>
-                  ) : (
-                    <motion.div className="space-y-2 md:space-y-3">
-                      {messages.map((msg, index) => (
-                        <motion.div
-                          key={index}
-                          className={`p-2 md:p-3 rounded-lg ${
-                            msg.sender === 'user' 
-                              ? 'bg-blue-100 ml-4 md:ml-12' 
-                              : 'bg-gray-100 mr-4 md:mr-12'
-                          }`}
-                          initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                        <motion.p 
+                          className="text-gray-500 text-center"
+                          initial={{ scale: 0.9 }}
+                          animate={{ scale: 1 }}
                           transition={{ 
-                            duration: 0.3,
-                            type: "spring",
-                            stiffness: 500,
-                            damping: 25
-                          }}
-                          whileHover={{ 
-                            scale: 1.01,
-                            backgroundColor: msg.sender === 'user' ? "#dbeafe" : "#f3f4f6"
+                            repeat: Infinity, 
+                            repeatType: "reverse", 
+                            duration: 2,
+                            ease: "easeInOut" 
                           }}
                         >
-                          {msg.text}
-                        </motion.div>
-                      ))}
-                      <div ref={messagesEndRef} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                          No messages yet...
+                        </motion.p>
+                      </motion.div>
+                    ) : (
+                      <motion.div className="space-y-2 md:space-y-3 p-2">
+                        {messages.map((msg, index) => (
+                          <motion.div
+                            key={index}
+                            className={`p-2 md:p-3 rounded-lg ${
+                              msg.sender === 'user' 
+                                ? 'bg-blue-100 ml-4 md:ml-12' 
+                                : 'bg-gray-100 mr-4 md:mr-12'
+                            }`}
+                            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ 
+                              duration: 0.3,
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 25
+                            }}
+                            whileHover={{ 
+                              scale: 1.01,
+                              backgroundColor: msg.sender === 'user' ? "#dbeafe" : "#f3f4f6"
+                            }}
+                          >
+                            {msg.sender === 'user' ? (
+                              <div className="whitespace-pre-wrap">{msg.text}</div>
+                            ) : (
+                              <div 
+                                className="ai-message" 
+                                dangerouslySetInnerHTML={{ __html: formatText(msg.text) }}
+                              />
+                            )}
+                          </motion.div>
+                        ))}
+                        <div ref={messagesEndRef} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </CardContent>
             </Card>
             <motion.div 
