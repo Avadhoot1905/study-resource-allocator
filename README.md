@@ -45,3 +45,10 @@ An AI-powered learning platform that generates personalized quizzes and interact
    ```bash
    git clone https://github.com/your-username/study-resource-allocator.git
    cd study-resource-allocator
+   ```
+2. Install Dependancies and run on browser
+   ```bash
+   npm i
+   npm run dev
+   ```
+   Run on broswer using 'http://localhost:3000/'
