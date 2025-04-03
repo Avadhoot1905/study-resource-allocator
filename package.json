@@ -62,5 +62,6 @@
   "bugs": {
     "url": "https://github.com/Avadhoot1905/study-resource-allocator/issues"
   },
-  "homepage": "https://github.com/Avadhoot1905/study-resource-allocator#readme"
+  "homepage": "https://github.com/Avadhoot1905/study-resource-allocator#readme",
+  "type" : "module"
 }
