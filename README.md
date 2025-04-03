@@ -52,3 +52,5 @@ An AI-powered learning platform that generates personalized quizzes and interact
    npm run dev
    ```
    Run on broswer using 'http://localhost:3000/'
+
+` Private information protected by env `
