@@ -1,272 +1,148 @@
 'use client';
 
-import React from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
-
-interface Question {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-}
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import { useState } from "react";
 
 interface QuizResultsProps {
-  questions: Question[];
+  questions: {
+    question: string;
+    options: string[];
+    correctAnswer: string;
+    explanation?: string;
+  }[];
   selectedOptions: string[];
   timeUsed: number;
+  timeLimit: number;
   onRestart: () => void;
 }
 
-export default function QuizResults({ questions, selectedOptions, timeUsed, onRestart }: QuizResultsProps) {
-  const calculateResults = () => {
-    let correctAnswers = 0;
-    questions.forEach((question, index) => {
-      if (selectedOptions[index] === question.correctAnswer) {
-        correctAnswers++;
-      }
-    });
-    return {
-      score: correctAnswers,
-      totalQuestions: questions.length,
-      percentage: (correctAnswers / questions.length) * 100,
-      timeUsed: timeUsed
-    };
+export default function QuizResults({
+  questions,
+  selectedOptions,
+  timeUsed,
+  timeLimit,
+  onRestart,
+}: QuizResultsProps) {
+  const [viewMode, setViewMode] = useState<'summary' | 'review'>('summary');
+
+  const correctAnswers = questions.reduce((count, question, index) => {
+    return count + (selectedOptions[index] === question.correctAnswer ? 1 : 0);
+  }, 0);
+
+  const percentage = (correctAnswers / questions.length) * 100;
+  const timePercentage = (timeUsed / timeLimit) * 100;
+
+  const getResultBadge = (): { text: string; variant: "default" | "destructive" | "secondary" | "outline" | null | undefined } => {
+      if (percentage >= 80) return { text: "Excellent!", variant: "default" };
+      if (percentage >= 60) return { text: "Good Job!", variant: "secondary" };
+      return { text: "Keep Practicing", variant: "destructive" };
   };
 
-  const { score, totalQuestions, percentage, timeUsed: finalTime } = calculateResults();
-  const minutes = Math.floor(finalTime / 60);
-  const seconds = finalTime % 60;
-  const timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-  const getResultFeedback = (percentage: number) => {
-    if (percentage >= 90) return { message: "Excellent!", color: "bg-green-500" };
-    if (percentage >= 70) return { message: "Good job!", color: "bg-blue-500" };
-    if (percentage >= 50) return { message: "Nice try!", color: "bg-yellow-500" };
-    return { message: "Keep practicing!", color: "bg-red-500" };
-  };
-
-  const feedback = getResultFeedback(percentage);
-
-  // Animation variants
-  const cardVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 30,
-        duration: 0.8 
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (custom: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { 
-        delay: custom * 0.1,
-        duration: 0.5
-      }
-    })
-  };
-
-  const buttonVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: (custom: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { 
-        delay: 1 + (custom * 0.1),
-        duration: 0.3
-      }
-    }),
-    hover: { 
-      scale: 1.05,
-      transition: { duration: 0.2 }
-    },
-    tap: { 
-      scale: 0.95,
-      transition: { duration: 0.1 }
-    }
-  };
+  const resultBadge = getResultBadge();
 
   return (
     <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={cardVariants}
-      className="w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="w-full max-w-2xl mx-auto space-y-6"
     >
-      <Card className="shadow-lg overflow-hidden">
-        <CardHeader className="text-center pb-2 relative">
-          <motion.div
-            variants={itemVariants}
-            custom={0}
-            className="flex justify-center mb-2"
-          >
-            <Badge className={`${feedback.color} text-white`}>
-              {feedback.message}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-center">Quiz Results</CardTitle>
+          <div className="flex justify-center">
+            <Badge variant={resultBadge.variant}>
+              {resultBadge.text}
             </Badge>
-          </motion.div>
-          <motion.div
-            variants={itemVariants}
-            custom={1}
-          >
-            <CardTitle className="text-3xl">Quiz Results</CardTitle>
-          </motion.div>
-          <motion.div
-            variants={itemVariants}
-            custom={2}
-          >
-            <CardDescription>You've completed the quiz!</CardDescription>
-          </motion.div>
+          </div>
         </CardHeader>
         
-        <CardContent className="space-y-6 pt-4">
-          <motion.div 
-            className="flex justify-between items-center"
-            variants={itemVariants}
-            custom={3}
-          >
-            <span className="text-lg font-medium">Score:</span>
-            <motion.span 
-              className="text-2xl font-bold"
-              initial={{ opacity: 0 }}
-              animate={{ 
-                opacity: 1,
-                transition: { delay: 0.5, duration: 0.5 }
-              }}
-            >
-              {score}/{totalQuestions}
-            </motion.span>
-          </motion.div>
-          
-          <motion.div 
-            className="space-y-2"
-            variants={itemVariants}
-            custom={4}
-          >
-            <div className="flex justify-between text-sm">
-              <span>Percentage</span>
-              <motion.span 
-                className="font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ 
-                  opacity: 1,
-                  transition: { delay: 0.7, duration: 0.5 }
-                }}
-              >
-                {percentage.toFixed(1)}%
-              </motion.span>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <h3 className="font-medium">Score</h3>
+              <div className="text-3xl font-bold">
+                {correctAnswers}/{questions.length}
+              </div>
+              <Progress value={percentage} className="h-2" />
+              <div className="text-sm text-muted-foreground">
+                {percentage.toFixed(1)}% correct
+              </div>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <motion.div 
-                className={`h-full ${feedback.color}`}
-                initial={{ width: 0 }}
-                animate={{ width: `${percentage}%` }}
-                transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
-              />
-            </div>
-          </motion.div>
-          
-          <motion.div 
-            className="bg-gray-50 p-4 rounded-md"
-            variants={itemVariants}
-            custom={5}
-          >
-            <h3 className="font-semibold mb-2">Performance Summary</h3>
-            <ul className="space-y-1 text-sm">
-              <motion.li 
-                className="flex justify-between"
-                variants={itemVariants}
-                custom={6}
-              >
-                <span>Correct Answers:</span>
-                <span>{score}</span>
-              </motion.li>
-              <motion.li 
-                className="flex justify-between"
-                variants={itemVariants}
-                custom={7}
-              >
-                <span>Incorrect Answers:</span>
-                <span>{totalQuestions - score}</span>
-              </motion.li>
-              <motion.li 
-                className="flex justify-between"
-                variants={itemVariants}
-                custom={8}
-              >
-                <span>Completion Time:</span>
-                <span>{timeString}</span>
-              </motion.li>
-            </ul>
-          </motion.div>
-        </CardContent>
-        
-        <CardFooter className="flex-col space-y-2">
-          <motion.div
-            variants={buttonVariants}
-            custom={0}
-            whileHover="hover"
-            whileTap="tap"
-            className="w-full"
-          >
-            <Button 
-              onClick={onRestart} 
-              className="w-full"
-              variant="default"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retake Quiz
-            </Button>
-          </motion.div>
-          
-          <div className="flex w-full gap-2">
-            <motion.div
-              variants={buttonVariants}
-              custom={1}
-              whileHover="hover"
-              whileTap="tap"
-              className="flex-1"
-            >
-              <Button 
-                onClick={() => window.location.reload()} 
-                variant="outline"
-                className="w-full"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Quiz Page
-              </Button>
-            </motion.div>
             
-            <motion.div
-              variants={buttonVariants}
-              custom={2}
-              whileHover="hover"
-              whileTap="tap"
+            <div className="space-y-2">
+              <h3 className="font-medium">Time</h3>
+              <div className="text-3xl font-bold">
+                {Math.floor(timeUsed / 60)}:{String(timeUsed % 60).padStart(2, '0')}
+              </div>
+              <Progress value={timePercentage} className="h-2" />
+              <div className="text-sm text-muted-foreground">
+                {Math.floor(timeLimit / 60)}:{String(timeLimit % 60).padStart(2, '0')} total
+              </div>
+            </div>
+          </div>
+
+          <div className="flex space-x-2">
+            <Button
+              variant={viewMode === 'summary' ? 'default' : 'outline'}
+              onClick={() => setViewMode('summary')}
               className="flex-1"
             >
-              <Button 
-                onClick={() => alert('Share feature would go here')} 
-                variant="outline"
-                className="w-full"
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Results
-              </Button>
-            </motion.div>
+              Summary
+            </Button>
+            <Button
+              variant={viewMode === 'review' ? 'default' : 'outline'}
+              onClick={() => setViewMode('review')}
+              className="flex-1"
+            >
+              Review Mistakes
+            </Button>
           </div>
-        </CardFooter>
+
+          {viewMode === 'review' && (
+            <div className="space-y-4">
+              <h3 className="font-medium">Question Review</h3>
+              {questions.map((question, index) => {
+                if (selectedOptions[index] === question.correctAnswer) return null;
+                
+                return (
+                  <div key={index} className="p-4 border rounded-lg">
+                    <h4 className="font-medium">{question.question}</h4>
+                    <div className="mt-2 space-y-1">
+                      <div className="text-destructive">
+        Your answer: {selectedOptions[index] || "Skipped"}
+                      </div>
+                      <div className="text-success">
+        Correct answer: {question.correctAnswer}
+                      </div>
+                      {question.explanation && (
+                        <div className="text-sm text-muted-foreground mt-2">
+                          {question.explanation}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
       </Card>
+
+      <div className="flex justify-center gap-2">
+        <Button onClick={onRestart} className="gap-2">
+          <RefreshCw className="w-4 h-4" />
+          Retake Quiz
+        </Button>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          New Quiz
+        </Button>
+      </div>
     </motion.div>
   );
 }

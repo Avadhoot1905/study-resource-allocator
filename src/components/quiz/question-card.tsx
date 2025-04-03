@@ -1,40 +1,49 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
-// Define props for Question Card
 interface QuestionCardProps {
   question: string;
   options: string[];
   selectedOption: string;
-  onSelectOption: (selectedOption: string) => void;
+  onSelectOption: (option: string) => void;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ 
-  question, 
-  options, 
-  selectedOption, 
-  onSelectOption 
-}) => {
+export default function QuestionCard({
+  question,
+  options,
+  selectedOption,
+  onSelectOption,
+}: QuestionCardProps) {
   return (
-    <Card className="w-96 p-4 shadow-md">
-      <CardHeader>
-        <CardTitle>{question}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {options.map((option) => (
-          <Button 
-            key={option} 
-            className={`w-full ${selectedOption === option ? 'bg-blue-600' : ''}`} 
-            onClick={() => onSelectOption(option)}
-          >
-            {option}
-          </Button>
+    <div className="space-y-4">
+      <h2 className="text-xl font-medium">{question}</h2>
+      
+      <RadioGroup 
+        value={selectedOption} 
+        onValueChange={onSelectOption}
+        className="space-y-2"
+      >
+        {options.map((option, index) => (
+          <div key={index} className="flex items-center space-x-3">
+            <RadioGroupItem 
+              value={option} 
+              id={`option-${index}`}
+            />
+            <Label 
+              htmlFor={`option-${index}`}
+              className={cn(
+                "text-base font-normal",
+                selectedOption === option && "font-medium"
+              )}
+            >
+              {option}
+            </Label>
+          </div>
         ))}
-      </CardContent>
-    </Card>
+      </RadioGroup>
+    </div>
   );
-};
-
-export default QuestionCard;
+}
