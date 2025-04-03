@@ -32,10 +32,10 @@ export async function generateRoadmap(subject: string, level: string = "beginner
   2. 'edges' array with objects having: id (string), source (string), target (string), and animated (boolean)
   
   The nodes should include:
-  - 1 main topic node at the top (style with blue background)
-  - 3-5 subtopic nodes (style with green background)
-  - 2-3 resource nodes per subtopic (style with purple background)
-  - 1 final project/output node at the bottom (style with orange background)
+  - the subdivisions of the subject as nodes
+  - the connections between them as edges
+  - try making it as detailed as possible
+  - use different colours as per the hierarchy
   
   Example format:
   {
