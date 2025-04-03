@@ -53,4 +53,4 @@ An AI-powered learning platform that generates personalized quizzes and interact
    ```
    Run on broswer using 'http://localhost:3000/'
 
-` Private information protected by env `
+` Protected information protected by .env `
