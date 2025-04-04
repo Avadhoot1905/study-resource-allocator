@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Clock, Users, FileQuestion, Map } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Home, Clock, Users, FileQuestion, Map, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarHeader, SidebarContent, SidebarGroup, SidebarFooter } from "@/components/ui/sidebar";
 import { motion, AnimatePresence } from "framer-motion";
+import { signOut } from "next-auth/react";
+import { toast } from "react-hot-toast"; 
 
 const SidebarMenu = () => {
   const pathname = usePathname();
@@ -20,7 +22,6 @@ const SidebarMenu = () => {
     { name: "Pomodoro", icon: Clock, path: "/pomodoro" }
   ];
 
-  // Determine the selected item based on the current path
   const [selected, setSelected] = useState("");
   
   useEffect(() => {
@@ -28,7 +29,6 @@ const SidebarMenu = () => {
     setSelected(currentPath?.name || "Home");
   }, [pathname]);
 
-  // First-time animation flag - only animate on initial mount
   const [hasAnimated, setHasAnimated] = useState(false);
   
   useEffect(() => {
@@ -63,10 +63,25 @@ const SidebarMenu = () => {
     }
   };
 
-  // Handle navigation
   const handleNavigation = (path: string, name: string) => {
     setSelected(name);
     router.push(path);
+  };
+
+  // Logout function
+  const handleLogout = async () => {
+    try {
+      await signOut({
+        redirect: false,
+        callbackUrl: "/"
+      });
+      toast.success("Logged out successfully");
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to logout");
+      console.error("Logout error:", error);
+    }
   };
 
   return (
@@ -113,7 +128,6 @@ const SidebarMenu = () => {
                   </motion.div>
                   <span>{item.name}</span>
                   
-                  {/* Conditional pill indicator instead of line */}
                   {selected === item.name && (
                     <motion.div
                       className="absolute right-2 h-2 w-2 rounded-full bg-blue-600"
@@ -139,20 +153,17 @@ const SidebarMenu = () => {
             }}
           >
             <motion.div
-              whileHover={{ y: -3, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+              whileHover={{ y: -3 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             >
-              <Card className="bg-gray-100 p-3">
-                <h3 className="text-black text-sm font-semibold">study.ai</h3>
-                <p className="text-gray-400 text-xs">User details</p>
-                <motion.button 
-                  className="text-blue-400 text-xs cursor-pointer hover:text-blue-700 mt-2"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Edit
-                </motion.button>
-              </Card>
+              <Button
+                variant="ghost"
+                className="w-full flex items-center gap-2 justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Log Out</span>
+              </Button>
             </motion.div>
           </motion.div>
         </SidebarFooter>

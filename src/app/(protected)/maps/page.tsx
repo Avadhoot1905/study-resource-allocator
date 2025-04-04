@@ -22,9 +22,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { motion, AnimatePresence } from "framer-motion";
-import { generateRoadmap } from "../actions/maps";
+import { generateRoadmap } from "@/app/actions/maps";
 
-const initialSubjects = ["Math", "Science", "History", "Geography", "Computer Science", "Physics", "Chemistry"];
 
 // Animation variants
 const containerVariants = {
@@ -109,7 +108,7 @@ const MapsPage = () => {
   const [newSubject, setNewSubject] = useState("");
   const [customSubjects, setCustomSubjects] = useState<string[]>([]);
 
-  const allSubjects = [...initialSubjects, ...customSubjects];
+  const allSubjects = [...customSubjects];
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
